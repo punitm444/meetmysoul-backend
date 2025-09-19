@@ -1,3 +1,4 @@
+// routes/admin.js
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
@@ -51,11 +52,15 @@ router.get("/users", async (req, res) => {
     }
 });
 
-// 📌 Delete user by ID
+// 📌 Delete user by ID (🚫 block deleting admins)
 router.delete("/users/:id", async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ msg: "User not found" });
+
+        if (user.role === "admin") {
+            return res.status(403).json({ msg: "Admins cannot be deleted" });
+        }
 
         await user.deleteOne();
         res.json({ msg: "User removed" });
